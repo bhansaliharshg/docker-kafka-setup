@@ -2,7 +2,7 @@ import snscrape.modules.twitter as sntwitter
 from kafka import KafkaProducer
 import json, re, string
 from time import sleep
-from nltk.corpus import stopwords, words
+from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 wn = WordNetLemmatizer()
