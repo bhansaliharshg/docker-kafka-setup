@@ -1,7 +1,21 @@
 import snscrape.modules.twitter as sntwitter
 from kafka import KafkaProducer
-import json
+import json, re, string
 from time import sleep
+from nltk.corpus import stopwords, words
+from nltk.stem import WordNetLemmatizer
+
+wn = WordNetLemmatizer()
+listOfStopWords = stopwords.words('english')
+
+def cleanText(text):
+    if text:   
+        lines = text.lower().split('\n')
+        lines = [' '.join(re.split('\W+', line.strip())) for line in lines if not line.startswith('http')]
+        lines = [''.join([char for char in line if char not in string.punctuation]) for line in lines]
+        return ''.join(' '.join(wn.lemmatize(word) for word in line.split(' ') if word not in listOfStopWords and not word.isnumeric()) for line in lines)
+    else:
+        return ''
 
 colums2 = ['Date', 'User', 'Tweet']
 data = []
@@ -18,7 +32,7 @@ for tweet in sntwitter.TwitterSearchScraper(query).get_items():
         location = {}
         if tweet.coordinates and tweet.coordinates.longitude and tweet.coordinates.latitude:
             location = {'longitude': tweet.coordinates.longitude, 'latitude': tweet.coordinates.latitude}
-        data = {'date': tweet.date.strftime("%Y-%m-%d %H:%M:%S"), 'user': tweet.user.username, 'tweet': tweet.content, 'tweet_id': tweet.id, 'location': location, 'source': tweet.sourceLabel}
+        data = {'date': tweet.date.strftime("%Y-%m-%d %H:%M:%S"), 'user': tweet.user.username, 'tweet': cleanText(tweet.content), 'tweet_id': tweet.id, 'location': location, 'source': tweet.sourceLabel}
         print('Sending', data)
         producer.send('tweet_stream', data)    
         if len(data) == limit:
