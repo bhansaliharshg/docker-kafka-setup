@@ -30,11 +30,21 @@ producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
 for tweet in sntwitter.TwitterSearchScraper(query).get_items():
     if tweet.lang == 'en':
         location = {}
+        user = {'username': tweet.user.username}
         if tweet.coordinates and tweet.coordinates.longitude and tweet.coordinates.latitude:
             location = {'longitude': tweet.coordinates.longitude, 'latitude': tweet.coordinates.latitude}
-        data = {'date': tweet.date.strftime("%Y-%m-%d %H:%M:%S"), 'user': tweet.user.username, 'tweet': cleanText(tweet.content), 'tweet_id': tweet.id, 'location': location, 'source': tweet.sourceLabel}
+        if tweet.user:
+            user = {'username': tweet.user.username, 'display_name': tweet.user.displayname, 'location': tweet.user.location, 'description': tweet.user.description, 'followers': tweet.user.followersCount, 'friends': tweet.user.friendsCount, 'id': tweet.user.id, 'verified': tweet.user.verified}
+        data = {'date': tweet.date.strftime("%Y-%m-%d %H:%M:%S"),
+                'user': user,
+                'tweet': cleanText(tweet.content),
+                'tweet_id': tweet.id,
+                'location': location,
+                'source': tweet.sourceLabel,
+                'like_count': tweet.likeCount,
+                'view_count': tweet.viewCount}
         print('Sending', data)
         producer.send('tweet_stream', data)    
         if len(data) == limit:
             break
-        sleep(2)
+        sleep(1)
