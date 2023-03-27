@@ -1,5 +1,6 @@
 from kafka import KafkaConsumer
 import json
+from textblob import TextBlob
 
 consumer = KafkaConsumer(
     'tweet_stream',
@@ -9,4 +10,11 @@ consumer = KafkaConsumer(
 
 for message in consumer:
     message = message.value
+    sentiment = TextBlob(message['tweet']).sentiment.polarity
+    if sentiment > 0:
+        message['sentiment'] = 1
+    elif sentiment < 0:
+        message['sentiment'] = -1
+    else:
+        message['sentiment'] = 0
     print(message)
