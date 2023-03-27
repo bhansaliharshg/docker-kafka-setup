@@ -3,3 +3,4 @@ snscrape
 nltk
 textblob
 geopy
+folium

@@ -21,7 +21,8 @@ colums2 = ['Date', 'User', 'Tweet']
 data = []
 
 query = '#covid19'
-limit = 1000
+limit = 100
+tweets = []
 
 producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                          value_serializer=lambda x: 
@@ -43,8 +44,9 @@ for tweet in sntwitter.TwitterSearchScraper(query).get_items():
                 'source': tweet.sourceLabel,
                 'like_count': tweet.likeCount,
                 'view_count': tweet.viewCount}
-        print('Sending', data)
-        producer.send('tweet_stream', data)    
-        if len(data) == limit:
+        tweets.append(data)
+        producer.send('tweet_stream', data)
+        print('Length of Data',len(tweets))
+        if len(tweets) == limit:
             break
         sleep(1)
