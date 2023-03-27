@@ -21,7 +21,7 @@ colums2 = ['Date', 'User', 'Tweet']
 data = []
 
 query = '#covid19'
-limit = 100
+limit = 1000
 
 producer = KafkaProducer(bootstrap_servers=['localhost:9092'],
                          value_serializer=lambda x: 
