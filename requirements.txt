@@ -4,3 +4,4 @@ nltk
 textblob
 geopy
 folium
+configparser

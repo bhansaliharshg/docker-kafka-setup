@@ -16,25 +16,28 @@ consumer = KafkaConsumer(
 
 for message in consumer:
     message = message.value
-    sentiment = TextBlob(message['tweet']).sentiment.polarity
-    if sentiment > 0:
-        message['sentiment'] = 1
-    elif sentiment < 0:
-        message['sentiment'] = -1
+    if len(message) == 1 and message['search_trigger']:
+        print('================= New Search Occured =================')
     else:
-        message['sentiment'] = 0
-    if message['location']:
-        coordinates = str(message['location']['latitude']) + ', ' + str(message['location']['longitude'])
-        location = geolocator.reverse(coordinates)
-        tooltip = 'Location'
-        if location and location.address:
-            message['address'] = location.address
-            tooltip = message['address']
-        if sentiment < 0:
-            folium.Marker(location=[message['location']['latitude'], message['location']['longitude']], tooltip=tooltip, icon=folium.Icon(color='red')).add_to(map)
-        elif sentiment > 0:
-            folium.Marker(location=[message['location']['latitude'], message['location']['longitude']], tooltip=tooltip, icon=folium.Icon(color='green')).add_to(map)
+        sentiment = TextBlob(message['tweet']).sentiment.polarity
+        if sentiment > 0:
+            message['sentiment'] = 1
+        elif sentiment < 0:
+            message['sentiment'] = -1
         else:
-            folium.Marker(location=[message['location']['latitude'], message['location']['longitude']], tooltip=tooltip).add_to(map)
-    map.save('index.html')
+            message['sentiment'] = 0
+        if message['location']:
+            coordinates = str(message['location']['latitude']) + ', ' + str(message['location']['longitude'])
+            location = geolocator.reverse(coordinates)
+            tooltip = 'Location'
+            if location and location.address:
+                message['address'] = location.address
+                tooltip = message['address']
+            if sentiment < 0:
+                folium.Marker(location=[message['location']['latitude'], message['location']['longitude']], tooltip=tooltip, icon=folium.Icon(color='red')).add_to(map)
+            elif sentiment > 0:
+                folium.Marker(location=[message['location']['latitude'], message['location']['longitude']], tooltip=tooltip, icon=folium.Icon(color='green')).add_to(map)
+            else:
+                folium.Marker(location=[message['location']['latitude'], message['location']['longitude']], tooltip=tooltip).add_to(map)
+        map.save('index.html')
     print(message)
